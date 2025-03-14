@@ -5,7 +5,6 @@ import {
   files_table as filesSchema,
   folders_table as foldersScehma,
 } from "~/server/db/schema";
-import { auth } from "@clerk/nextjs/server";
 
 export const QUERIES = {
   getAllParentsForFolder: async function (folderId: number) {
@@ -46,9 +45,12 @@ export const MUTATIONS = {
       name: string;
       size: number;
       url: string;
+      parent: number;
     };
     userId: string;
   }) {
-    return await db.insert(filesSchema).values({ ...input.file, parent: 1 });
+    return await db
+      .insert(filesSchema)
+      .values({ ...input.file, parent: input.file.parent });
   },
 };
