@@ -4,7 +4,7 @@ import { SignInButton } from "@clerk/nextjs";
 
 export default function SignIn() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <header className="border-b">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
@@ -23,7 +23,7 @@ export default function SignIn() {
         <div className="mx-auto w-full max-w-md space-y-6 px-4">
           <div className="space-y-2 text-center">
             <div className="rounded-lg border p-2 text-3xl font-bold">
-              <SignInButton forceRedirectUrl="/drive" />
+              <SignInButton forceRedirectUrl={"/drive"} />
             </div>
             <p className="text-muted-foreground">With your Google account</p>
           </div>
@@ -47,6 +47,6 @@ export default function SignIn() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 }

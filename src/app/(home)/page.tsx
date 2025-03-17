@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { signInRedirect } from "~/server/actions";
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col justify-center">
+    <>
       <header className="w-full border-b">
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
@@ -155,6 +155,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
