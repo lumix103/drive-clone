@@ -7,6 +7,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import { UTApi } from "uploadthing/server";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const utapi = new UTApi();
 
@@ -42,4 +43,12 @@ export async function deleteFile(fileId: number) {
   c.set("force-refresh", JSON.stringify(Math.random()));
 
   return { success: true };
+}
+
+export async function signInRedirect() {
+  const session = await auth();
+  if (!session.userId) {
+    return redirect("/sign-in");
+  }
+  return redirect("/drive");
 }
