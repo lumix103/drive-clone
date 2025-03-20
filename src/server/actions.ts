@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "./db";
 import { files_table, folders_table } from "./db/schema";
 import { auth } from "@clerk/nextjs/server";
@@ -47,6 +47,83 @@ export async function deleteFile(fileId: number) {
   return { success: true };
 }
 
+export async function deleteFolder(folderId: number) {
+  console.log("Deleting folder Called for", folderId);
+  const session = await auth();
+  if (!session.userId) {
+    return { error: { message: "Unauthorized" } };
+  }
+
+  console.log("Fetching folder", folderId);
+
+  const folder = await db
+    .select()
+    .from(folders_table)
+    .where(
+      and(
+        eq(folders_table.id, folderId),
+        eq(folders_table.ownerId, session.userId),
+      ),
+    );
+
+  if (!folder) {
+    return { error: { message: "Folder not found" } };
+  }
+
+  console.log("Folder found", folder);
+
+  if (folder[0]!.parent === null) {
+    return { error: { message: "Cannot delete root folder" } };
+  }
+
+  console.log("Parent folder is not root");
+
+  const parentFolder = folder[0]!.id;
+  let stack = await QUERIES.getFolders(parentFolder);
+  const folderIds = [];
+
+  console.log("Recursively fetching folders");
+  while (stack.length > 0) {
+    const currentIds = stack.map((f) => f.id);
+    stack = await db
+      .select()
+      .from(folders_table)
+      .where(inArray(folders_table.parent, currentIds));
+    folderIds.push(...currentIds);
+  }
+  folderIds.unshift(parentFolder);
+  console.log("Folder IDs", folderIds);
+  const files = await db
+    .select()
+    .from(files_table)
+    .where(inArray(files_table.parent, folderIds));
+
+  console.log("Files", files);
+
+  const utapiResults = await utapi.deleteFiles(
+    files.map((f) => f.url.replace("https://5tqgntgon3.ufs.sh/f/", "")),
+  );
+
+  console.log("UTAPI Results", utapiResults);
+
+  const fileDeleteResults = await db.delete(files_table).where(
+    inArray(
+      files_table.id,
+      files.map((f) => f.id),
+    ),
+  );
+  const folderDeleteResults = await db
+    .delete(folders_table)
+    .where(inArray(folders_table.id, folderIds));
+
+  console.log("File Delete Results", fileDeleteResults);
+  console.log("Folder Delete Results", folderDeleteResults);
+
+  const c = await cookies();
+  c.set("force-refresh", JSON.stringify(Math.random()));
+
+  return { success: true };
+}
 const createFolderSchema = z.object({
   name: z.string().min(1, { message: "Folder name is required" }).max(50, {
     message: "Folder name must be less than 50 characters",

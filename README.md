@@ -2,8 +2,8 @@
 
 ## TODO
 
-- [~] Redo the file UI
-- [ ] Folder deletion
+- [ ] Redo the file UI (In Progress)
+- [x] Folder deletion
 - [x] Folder creation
 - [ ] Access control
 - [ ] File view page
