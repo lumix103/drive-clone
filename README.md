@@ -7,4 +7,4 @@
 - [x] Folder creation
 - [x] Access control
 - [ ] File view page
-- [ ] Gray out rows when folders are being deleted
+- [x] Gray out rows when folders are being deleted

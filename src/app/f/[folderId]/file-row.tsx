@@ -1,5 +1,6 @@
 import { Folder as FolderIcon, FileIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { deleteFile, deleteFolder } from "~/server/actions";
 import type { files_table, folders_table } from "~/server/db/schema";
@@ -43,10 +44,19 @@ export function FolderRow(props: {
   folder: typeof folders_table.$inferSelect;
 }) {
   const { folder } = props;
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await deleteFolder(folder.id);
+  };
+
   return (
     <li
       key={folder.id}
-      className="hover:bg-gray-750 border-b border-gray-700 px-6 py-4"
+      className={`hover:bg-gray-750 border-b border-gray-700 px-6 py-4 ${
+        isDeleting ? "pointer-events-none opacity-50" : ""
+      }`}
     >
       <div className="grid grid-cols-12 items-center gap-4">
         <div className="col-span-6 flex items-center">
@@ -64,8 +74,9 @@ export function FolderRow(props: {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => deleteFolder(folder.id)}
+            onClick={handleDelete}
             aria-label="Delete Folder"
+            disabled={isDeleting}
           >
             <Trash2Icon size={20} />
           </Button>
